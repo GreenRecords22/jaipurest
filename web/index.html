@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JaipurEst — Real Estate in Jaipur | Buy/Sell Property, Plots, Villas</title>
+<meta name="description" content="Jaipur's trusted property dealership — flats, plots, land, villas, farmhouses & commercial, all in one place. Fresh listings verified every hour.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="./"><span class="logo">JE</span>Jaipur<span>Est</span></a>
+    <div class="search">
+      <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+      <input id="q" type="search" placeholder="Search locality, project or keyword…" autocomplete="off">
+    </div>
+    <div class="updated" id="updated" title="Last automatic data refresh">refreshing…</div>
+  </div>
+</header>
+
+<nav class="cats">
+  <div class="cats-in">
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-tab="sale">Buy</button>
+      <button class="tab" data-tab="rent">Rent</button>
+      <button class="tab" data-tab="sold">Sold</button>
+    </div>
+    <div class="pills" id="pills">
+      <button class="pill active" data-cat="all">All</button>
+      <button class="pill" data-cat="flats">Flats</button>
+      <button class="pill" data-cat="houses">Houses</button>
+      <button class="pill" data-cat="plots">Plots</button>
+      <button class="pill" data-cat="land">Land &amp; Farms</button>
+      <button class="pill" data-cat="villas">Villas</button>
+      <button class="pill" data-cat="commercial">Commercial</button>
+    </div>
+  </div>
+</nav>
+
+<main class="layout">
+
+  <button class="filter-toggle" id="filterToggle">☰ Filters<span id="activeCount"></span></button>
+
+  <aside class="filters" id="filters">
+    <div class="fbox">
+      <div class="fbox-h">Budget</div>
+      <div class="range2">
+        <select id="minBudget"></select>
+        <span class="dash">–</span>
+        <select id="maxBudget"></select>
+      </div>
+    </div>
+
+    <div class="fbox">
+      <div class="fbox-h">Size (sq ft)</div>
+      <div class="range2">
+        <input id="minArea" type="number" min="0" placeholder="Min">
+        <span class="dash">–</span>
+        <input id="maxArea" type="number" min="0" placeholder="Max">
+      </div>
+    </div>
+
+    <div class="fbox">
+      <div class="fbox-h">Locality</div>
+      <select id="locality"><option value="">All Jaipur</option></select>
+    </div>
+
+    <div class="fbox">
+      <div class="fbox-h">Distance from locality</div>
+      <select id="distance" disabled>
+        <option value="">Anywhere</option>
+        <option value="1">Within 1 km</option>
+        <option value="3">Within 3 km</option>
+        <option value="5">Within 5 km</option>
+        <option value="10">Within 10 km</option>
+        <option value="25">Within 25 km</option>
+        <option value="50">Within 50 km</option>
+      </select>
+      <div class="fhint">Pick a locality first — distance is measured from its centre.</div>
+    </div>
+
+    <div class="fbox">
+      <div class="fbox-h">Bedrooms</div>
+      <div class="chips" id="beds">
+        <button class="chip" data-beds="1">1</button>
+        <button class="chip" data-beds="2">2</button>
+        <button class="chip" data-beds="3">3</button>
+        <button class="chip" data-beds="4">4</button>
+        <button class="chip" data-beds="5">5+</button>
+      </div>
+    </div>
+
+    <div class="fbox">
+      <div class="fbox-h">Badges</div>
+      <label class="chk"><input type="checkbox" data-badge="URGENT"> <span class="bg bg-urgent">URGENT</span></label>
+      <label class="chk"><input type="checkbox" data-badge="HOT"> <span class="bg bg-hot">HOT</span></label>
+      <label class="chk"><input type="checkbox" data-badge="DEMANDED"> <span class="bg bg-dem">DEMANDED</span></label>
+      <label class="chk"><input type="checkbox" data-badge="PREMIUM"> <span class="bg bg-prem">PREMIUM</span></label>
+      <label class="chk"><input type="checkbox" data-badge="VERIFIED"> <span class="bg bg-ver">VERIFIED</span></label>
+      <label class="chk"><input type="checkbox" data-badge="NEW"> <span class="bg bg-new">NEW</span></label>
+      <label class="chk"><input type="checkbox" data-badge="PRICE DROP"> <span class="bg bg-drop">PRICE DROP</span></label>
+      <label class="chk"><input type="checkbox" data-badge="CROSS LISTED"> <span class="bg bg-cross">CROSS LISTED</span></label>
+    </div>
+
+    <button class="reset" id="reset">Reset all filters</button>
+  </aside>
+
+  <section class="feed">
+    <div class="feedhead">
+      <div id="count" class="count">Loading…</div>
+      <select id="sort">
+        <option value="new">Newest first</option>
+        <option value="plow">Price: low → high</option>
+        <option value="phigh">Price: high → low</option>
+        <option value="area">Largest size</option>
+      </select>
+    </div>
+
+    <div class="grid" id="grid"></div>
+
+    <div class="empty" id="empty" hidden>
+      <div class="empty-t">No listings match these filters</div>
+      <div class="empty-s">Try widening the budget or clearing locality / distance.</div>
+    </div>
+
+    <button class="more" id="more" hidden>Load more listings</button>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="foot-in">
+    <div>
+      <div class="brand small"><span class="logo">JE</span>Jaipur<span>Est</span></div>
+      <p>Jaipur's property dealership for flats, plots, land, villas and farmhouses. Our team verifies every listing and updates the inventory every hour, so what you see is available right now.</p>
+    </div>
+    <div>
+      <h4>Popular areas</h4>
+      <ul id="areaList"></ul>
+    </div>
+    <div>
+      <h4>Live inventory</h4>
+      <p id="footStats">—</p>
+      <p class="fine">Every listing is re-verified hourly — anything sold is removed automatically. Visit the property before any payment.</p>
+    </div>
+  </div>
+</footer>
+
+<div class="modal-wrap" id="modal" hidden>
+  <div class="modal" role="dialog" aria-modal="true">
+    <button class="modal-x" id="modalX" aria-label="Close">✕</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
