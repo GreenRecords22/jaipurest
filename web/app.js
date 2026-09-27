@@ -62,6 +62,24 @@ function haversine(a, b, c, d) {
   const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a)) * Math.cos(rad(c)) * Math.sin(dLon / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(h));
 }
+// Real calendar dates for the visit-slot picker, not "Today"/"Tomorrow" filler.
+// Anchored to IST: a buyer in Jaipur picking "today" must not get a UTC date
+// that has already rolled over. Sundays are skipped -- field agents work Mon-Sat.
+// ponytail: hardcoded to 7 days / Sun-off; add when a real availability feed exists.
+function nextDays(n = 7) {
+  const now = new Date(Date.now() + 5.5 * 3600e3); // IST = UTC+5:30
+  const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  let out = "";
+  for (let i = 0; i < n; i++) {
+    const d = new Date(now.getTime() + i * 86400e3);
+    if (d.getDay() === 0) continue;
+    out += `<option value="${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}">` +
+      `${DAYS[d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]}</option>`;
+  }
+  return out;
+}
+
 function typeLabel(t) {
   return (t || "property").replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
 }
@@ -77,9 +95,36 @@ function waNum() {
 }
 function waLink(r) {
   const price = r.price != null ? inr(r.price) : "price on request";
-  const msg = `Hi JaipurEst! I'm interested in ${refCode(r.id)} — ${r.title} (${price}, ${r.locality || "Jaipur"}). Please share details and a site-visit slot.`;
+  // The prefilled message carries the ref code AND a filtered link, so the agent
+  // reading the chat knows instantly which property it is and can send more
+  // options in the same locality with one tap instead of typing them out.
+  const ref = refCode(r.id);
+  const more = similarLink(r);
+  const msg =
+    `Hi JaipurEst! I'm interested in ${ref} — ${r.title} (${price}, ${r.locality || "Jaipur"}).\n` +
+    `More options in the same area: ${more}`;
   return `https://wa.me/${waNum()}?text=${encodeURIComponent(msg)}`;
 }
+// Reverse lookup: a buyer/agent only ever has a ref code (JRXXXXXX). Without this
+// the code is useless off-site -- paste it in the bar and the property opens.
+function findByRef(ref) {
+  const want = String(ref || "").trim().toUpperCase();
+  if (!/^JR[A-Z0-9]{1,6}$/.test(want)) return null;
+  return ACTIVE.concat(SOLD).find((r) => refCode(r.id) === want) || null;
+}
+
+// A ready-made filtered link for "same location, more options": the agent sends
+// ONE link instead of typing out 3 properties by hand on every call.
+function similarLink(r) {
+  const p = new URLSearchParams();
+  if (r.locality) p.set("loc", r.locality);
+  if (state.tab === "rent" || r.listing_type === "rent") p.set("tab", "rent");
+  if (r.property_type) p.set("cat", r.property_type);
+  if (r.bedrooms) p.set("beds", String(r.bedrooms));
+  const base = location.origin + location.pathname;
+  return base + (p.toString() ? "#" + p.toString() : "");
+}
+
 function waMsgLink(msg) {
   return `https://wa.me/${waNum()}?text=${encodeURIComponent(msg)}`;
 }
@@ -327,9 +372,7 @@ function openModal(id) {
             <option>Meet at a public place near me</option>
             <option>Straight to the property site visit</option>
           </select>
-          <select id="bkDay">
-            <option>Today</option><option>Tomorrow</option><option>This weekend</option><option>This week (any day)</option>
-          </select>
+          <select id="bkDay">${nextDays(7)}</select>
           <input id="bkTime" type="time" value="15:00" aria-label="Preferred time">
           <button class="btn btn-primary bk-go" type="submit">Request callback &amp; slot</button>
           <p class="bk-note">Our sales executive confirms your slot on WhatsApp within 10 minutes — meeting first at our office or a public place, property site visit after we finalise the shortlist.</p>
@@ -498,9 +541,17 @@ function bind() {
     const b = e.target.closest(".pill"); if (!b) return;
     state.cat = b.dataset.cat; state.page = 1; syncControls(); render();
   });
+  // A ref code is what a buyer/agent actually has in hand (from a WhatsApp chat
+  // or a call). If the query is a ref, jump straight to that property instead of
+  // returning "no results" for a text that appears nowhere in the listing.
   $("#q").addEventListener("input", (e) => {
     clearTimeout(qTimer);
-    qTimer = setTimeout(() => { state.q = e.target.value.trim().toLowerCase(); state.page = 1; render(); }, 180);
+    qTimer = setTimeout(() => {
+      const raw = e.target.value.trim();
+      const hit = findByRef(raw);
+      if (hit) { state.q = ""; state.page = 1; openModal(hit); return; }
+      state.q = raw.toLowerCase(); state.page = 1; render();
+    }, 180);
   });
   $("#locality").addEventListener("change", (e) => {
     state.locality = e.target.value;
