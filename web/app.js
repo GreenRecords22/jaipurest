@@ -650,6 +650,18 @@ async function boot() {
     $("#count").textContent = "Could not load data — run the scraper first.";
     return;
   }
+  // Seller-pushed properties the admin approved. Joined onto ACTIVE so they
+  // filter, sort and get a modal for free -- but only AFTER approval, and the
+  // seller's number is never in the payload (the leadbox strips it).
+  fetch(META?.site?.lead_endpoint + "/listings")
+    .then((r) => (r.ok ? r.json() : []))
+    .then((own) => {
+      if (Array.isArray(own) && own.length) {
+        ACTIVE = ACTIVE.concat(own.map(ownCard));
+        render(); // the first paint happened before this landed
+      }
+    })
+    .catch(() => {});
   fillLocalities();
   fillSources();
   readHash();
@@ -657,5 +669,27 @@ async function boot() {
   paintMeta();
   bind();
   render();
+}
+
+// A seller-submitted record in the shape the rest of the UI already expects.
+function ownCard(x) {
+  return {
+    id: x.id,
+    title: x.title || `${x.ptype || "Property"} in ${x.locality || "Jaipur"}`,
+    locality: x.locality,
+    price_display: x.price,
+    price: Number(String(x.price || "").replace(/[^\d.]/g, "")) || null,
+    area_display: x.area ? x.area + " sq.ft" : null,
+    area_sqft: Number(x.area) || null,
+    bedrooms: x.beds || null,
+    property_type: (x.ptype || "").toLowerCase().replace(/\s+/g, "_"),
+    listing_type: x.listingType === "rent" ? "rent" : "sale",
+    status: "active",
+    images: [],
+    source: "seller",
+    badges: ["direct"],
+    source_url: "",
+    is_own: true,
+  };
 }
 boot();
