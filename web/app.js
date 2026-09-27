@@ -368,8 +368,10 @@ function openModal(id) {
       `Meeting: ${payload.mode}\n` +
       `Preferred slot: ${payload.day} at ${payload.time}\n` +
       `— via JaipurEst website`;
+    // Never fire a request at the un-replaced placeholder: a browser error in
+    // the console on every enquiry is worse than no POST at all.
     const ep = META.site && META.site.lead_endpoint;
-    if (ep) {
+    if (ep && /^https:\/\//.test(ep) && !/YOUR-|<your-/i.test(ep)) {
       fetch(ep, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
