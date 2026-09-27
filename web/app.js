@@ -167,10 +167,13 @@ function cardHTML(r) {
   const priceTxt = r.price == null
     ? `<span class="pr-na">Price on request</span>`
     : inr(r.price);
+  const npx = r.images && r.images.length > 1
+    ? `<span class="npx">📷 ${r.images.length} photos</span>` : "";
   return `
   <article class="card" data-id="${r.id}">
     <div class="card-img">
       ${img}
+      ${npx}
       <div class="badges">${badges}</div>
     </div>
     <div class="card-body">
@@ -205,12 +208,90 @@ function render() {
 }
 
 /* ---------------------------------------------------------------- detail modal */
+/* ---------- photo gallery: thumbs in modal + full-screen lightbox ---------- */
+let LB = null;
+function bindGallery(r, gal) {
+  const box = $("#modalBody .gal");
+  if (!box) return;
+  const main = box.querySelector("#galImg");
+  const count = box.querySelector(".gal-count");
+  const thumbs = [...box.querySelectorAll(".gal-thumbs img")];
+  const show = (i) => {
+    const k = (i + gal.length) % gal.length;
+    main.src = gal[k];
+    count.textContent = `${k + 1} / ${gal.length}`;
+    thumbs.forEach((t, j) => t.classList.toggle("on", j === k));
+    box._i = k;
+  };
+  box._i = 0;
+  box.querySelector(".g-prev").addEventListener("click", (e) => { e.stopPropagation(); show(box._i - 1); });
+  box.querySelector(".g-next").addEventListener("click", (e) => { e.stopPropagation(); show(box._i + 1); });
+  box.querySelector(".gal-thumbs").addEventListener("click", (e) => {
+    const t = e.target.closest("img[data-i]");
+    if (t) show(+t.dataset.i);
+  });
+  box.querySelector(".gal-main").addEventListener("click", () => openLightbox(gal, box._i, r));
+}
+
+function openLightbox(gal, i, r) {
+  if (!LB) {
+    LB = document.createElement("div");
+    LB.id = "lbox";
+    LB.hidden = true;
+    LB.innerHTML = `
+      <img id="lbImg" alt="">
+      <button type="button" class="gal-nav l-prev" aria-label="Previous photo">‹</button>
+      <button type="button" class="gal-nav l-next" aria-label="Next photo">›</button>
+      <span class="gal-count lb-count"></span>
+      <button type="button" class="lb-x" aria-label="Close">×</button>
+      <div class="lb-cap"></div>`;
+    document.body.appendChild(LB);
+    LB.addEventListener("click", (e) => {
+      if (e.target === LB || e.target.closest(".lb-x")) { closeLightbox(); return; }
+      if (e.target.closest(".l-prev")) { e.stopPropagation(); lbShow(LB._i - 1); return; }
+      if (e.target.closest(".l-next")) { e.stopPropagation(); lbShow(LB._i + 1); return; }
+    });
+  }
+  LB._gal = gal; LB._i = i; LB._r = r;
+  lbShow(i);
+  LB.hidden = false;
+  document.body.style.overflow = "hidden";
+}
+function lbShow(i) {
+  const g = LB._gal || [];
+  if (!g.length) return;
+  LB._i = (i + g.length) % g.length;
+  LB.querySelector("#lbImg").src = g[LB._i];
+  LB.querySelector(".lb-count").textContent = `${LB._i + 1} / ${g.length}`;
+  LB.querySelector(".lb-cap").textContent = LB._r
+    ? `${LB._r.title} · ${LB._r.locality || "Jaipur"} · ${refCode(LB._r.id)}`
+    : "";
+}
+function closeLightbox() {
+  if (!LB) return;
+  LB.hidden = true;
+  const m = $("#modal");
+  document.body.style.overflow = (m && m.classList.contains("on")) ? "hidden" : "";
+}
+
 function openModal(id) {
   const r = currentList().find((x) => x.id === id) || ACTIVE.find((x) => x.id === id);
   if (!r) return;
-  const img = r.images && r.images[0]
-    ? `<img src="${esc(r.images[0])}" alt="${esc(r.title)}" data-t="${esc(typeLabel(r.property_type))}">`
-    : `<div class="ph">${esc(typeLabel(r.property_type))}</div>`;
+  const gal = (r.images || []).filter(Boolean);
+  const img = gal.length > 1
+    ? `<div class="gal">
+         <div class="gal-main" title="Click to view full screen">
+           <img id="galImg" src="${esc(gal[0])}" alt="${esc(r.title)}" data-t="${esc(typeLabel(r.property_type))}">
+           <button type="button" class="gal-nav g-prev" aria-label="Previous photo">‹</button>
+           <button type="button" class="gal-nav g-next" aria-label="Next photo">›</button>
+           <span class="gal-count">1 / ${gal.length}</span>
+         </div>
+         <div class="gal-thumbs">${gal.map((u, i) =>
+           `<img src="${esc(u)}" data-i="${i}" class="${i === 0 ? "on" : ""}" loading="lazy" alt="">`).join("")}</div>
+       </div>`
+    : gal.length
+      ? `<img src="${esc(gal[0])}" alt="${esc(r.title)}" data-t="${esc(typeLabel(r.property_type))}">`
+      : `<div class="ph">${esc(typeLabel(r.property_type))}</div>`;
   const cells = [
     ["Type", typeLabel(r.property_type) + (r.listing_type === "rent" ? " · Rent" : " · Sale")],
     ["Size", r.area_sqft ? sqft(r.area_sqft) : "—"],
@@ -259,6 +340,7 @@ function openModal(id) {
     </div>`;
   $("#modal").hidden = false;
   document.body.style.overflow = "hidden";
+  if (gal.length > 1) bindGallery(r, gal);
   const c2 = $("#modalClose2");
   if (c2) c2.onclick = closeModal;
   const bf = $("#bookForm");
@@ -455,7 +537,18 @@ function bind() {
   });
   $("#modalX").addEventListener("click", closeModal);
   $("#modal").addEventListener("click", (e) => { if (e.target.id === "modal") closeModal(); });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      if (LB && !LB.hidden) { closeLightbox(); return; }
+      closeModal();
+      return;
+    }
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    const d = e.key === "ArrowRight" ? 1 : -1;
+    if (LB && !LB.hidden) { lbShow(LB._i + d); return; }
+    const box = $("#modalBody .gal");
+    if (box) box.querySelector(d > 0 ? ".g-next" : ".g-prev")?.click();
+  });
 }
 
 /* ---------------------------------------------------------------- boot */
