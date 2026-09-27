@@ -380,7 +380,9 @@ function openModal(id) {
         <a class="btn btn-ghost" href="${esc(telLink())}">📞 Call us</a>
         <button class="btn btn-ghost" id="modalClose2">Close</button>
       </div>
-      <div class="m-book">
+      <details class="m-funnel">
+        <summary>Serious buyer? Get a callback &amp; site-visit slot</summary>
+        <div class="m-book">
         <div class="bk-h">📅 Book a meeting / site visit — ${esc(refCode(r.id))}</div>
         <form id="bookForm" class="bk-form">
           <input id="bkName" required maxlength="60" placeholder="Your name *" autocomplete="name">
@@ -398,6 +400,7 @@ function openModal(id) {
         </form>
         <div class="bk-ok" id="bkOk" hidden>✅ Enquiry sent — check WhatsApp, our property expert is on it. Ref <b>${esc(refCode(r.id))}</b>.</div>
       </div>
+      </details>
       <div class="m-seen">First seen ${esc(timeAgo(r.first_seen))} · last verified ${esc(timeAgo(r.last_seen))} · re-verified ${esc(META.site.refresh_note || "daily")}</div>
     </div>`;
   $("#modal").hidden = false;

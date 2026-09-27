@@ -339,6 +339,21 @@ select:focus, input:focus { border-color: var(--acc); }
 .m-seen { font-size: 12px; color: var(--ink-3); margin-top: 14px; }
 
 /* ---- book a meeting / site visit ---- */
+/* The WhatsApp button above is the primary CTA and needs no form, so the
+   booking form is collapsed by default. A native <details> keeps it
+   keyboard- and screen-reader-accessible with no JS, and it holds state
+   across the render() calls that replace ACTIVE on boot(). */
+.m-funnel { margin-top: 18px; }
+.m-funnel > summary {
+  cursor: pointer; font-size: 14.5px; font-weight: 600; color: var(--acc-dark);
+  background: var(--bg); border: 1px solid var(--line); border-radius: 12px;
+  padding: 12px 14px; list-style: none;
+}
+.m-funnel > summary::-webkit-details-marker { display: none; }
+.m-funnel > summary::before { content: "→ "; }
+.m-funnel[open] > summary::before { content: "↓ "; }
+.m-funnel[open] > summary { border-radius: 12px 12px 0 0; }
+.m-funnel .m-book { border-top: 0; }
 .m-book { margin-top: 18px; border: 1px solid var(--line); border-radius: 12px; padding: 14px; background: var(--bg); }
 .bk-h { font-weight: 700; font-size: 14.5px; margin-bottom: 10px; }
 .bk-form { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
