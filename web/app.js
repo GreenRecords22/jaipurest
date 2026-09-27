@@ -129,7 +129,7 @@ function waMsgLink(msg) {
   return `https://wa.me/${waNum()}?text=${encodeURIComponent(msg)}`;
 }
 function telLink() {
-  return "tel:" + ((META.site && META.site.phone) || "+919999999999");
+  return "tel:" + ((META.site && META.site.phone) || "+919660670160");
 }
 const BADGE_CLASS = {
   "URGENT": "bg-urgent",
@@ -319,9 +319,28 @@ function closeLightbox() {
   document.body.style.overflow = (m && m.classList.contains("on")) ? "hidden" : "";
 }
 
+// ------------------------------------------------------------- demand count
+// Fire-and-forget. The badge only asks "is this hot?", never an exact number, so
+// a dropped or duplicate increment is not worth a spinner or an error path.
+// `keepalive` lets the POST survive the page being closed on mobile.
+function countView(ref) {
+  const ep = (META.site || {}).view_endpoint;
+  if (!ep || !ref) return;
+  try {
+    fetch(ep + "/view", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ id: ref }),
+      keepalive: true,
+      mode: "cors",
+    }).catch(() => {});
+  } catch (e) { /* a lost view must never break the page */ }
+}
+
 function openModal(id) {
   const r = currentList().find((x) => x.id === id) || ACTIVE.find((x) => x.id === id);
   if (!r) return;
+  countView(refCode(r.id));
   const gal = (r.images || []).filter(Boolean);
   const img = gal.length > 1
     ? `<div class="gal">
@@ -379,7 +398,7 @@ function openModal(id) {
         </form>
         <div class="bk-ok" id="bkOk" hidden>✅ Enquiry sent — check WhatsApp, our property expert is on it. Ref <b>${esc(refCode(r.id))}</b>.</div>
       </div>
-      <div class="m-seen">First seen ${esc(timeAgo(r.first_seen))} · last verified ${esc(timeAgo(r.last_seen))} · auto-checked every hour</div>
+      <div class="m-seen">First seen ${esc(timeAgo(r.first_seen))} · last verified ${esc(timeAgo(r.last_seen))} · re-verified ${esc(META.site.refresh_note || "daily")}</div>
     </div>`;
   $("#modal").hidden = false;
   document.body.style.overflow = "hidden";
@@ -517,7 +536,7 @@ function syncControls() {
 /* ---------------------------------------------------------------- meta UI */
 function paintMeta() {
   const fin = META.last_run && META.last_run.finished_at;
-  $("#updated").textContent = fin ? "↻ updated " + timeAgo(fin) : "↻ auto-updates hourly";
+  $("#updated").textContent = fin ? "↻ updated " + timeAgo(fin) : "↻ auto-updates " + (META.site.refresh_note || "daily");
   const c = META.counts || {};
   const lt = META.listing_type_counts || {};
   $("#footStats").innerHTML =

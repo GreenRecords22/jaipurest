@@ -68,6 +68,15 @@ img { display: block; }
   padding: 6px 12px; border-radius: 999px;
 }
 
+/* The seller page is the only revenue path, so it gets a permanent, always
+   visible slot in the header rather than being buried in the footer. */
+.sell-link {
+  font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap;
+  background: var(--acc); padding: 7px 15px; border-radius: 999px;
+  text-decoration: none; transition: background .15s;
+}
+.sell-link:hover { background: var(--acc-dark); }
+
 /* ---------- category bar ---------- */
 .cats { background: var(--card); border-bottom: 1px solid var(--line); }
 .cats-in {

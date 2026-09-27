@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>List your property | JaipurEst — free listing for Jaipur sellers</title>
+<meta name="description" content="Post your flat, plot, house, villa, land or commercial property in Jaipur for free. Reach buyers searching by locality and budget. No brokerage on the listing.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+/* Seller page styles are scoped under .sp so the shared site CSS cannot leak
+   the other way, and the two pages can diverge without breaking the feed. */
+.sp-wrap{max-width:940px;margin:0 auto;padding:0 16px 70px}
+.sp-hero{background:linear-gradient(135deg,#f45b24,#e0480f);color:#fff;padding:38px 16px 34px;text-align:center}
+.sp-hero h1{margin:0 0 8px;font-size:30px;font-weight:700;line-height:1.25}
+.sp-hero p{margin:0 auto;max-width:640px;opacity:.95;font-size:15px}
+.sp-badge{display:inline-block;background:#fff;color:#f45b24;font-weight:600;padding:5px 14px;
+  border-radius:20px;font-size:13px;margin-bottom:14px}
+.sp-2col{display:grid;grid-template-columns:1.35fr 1fr;gap:26px;align-items:start;margin-top:30px}
+@media(max-width:820px){.sp-2col{grid-template-columns:1fr}}
+.sp-card{background:#fff;border:1px solid #eee;border-radius:12px;padding:22px}
+.sp-card h2{font-size:18px;margin:0 0 4px}
+.sp-card .sub{color:#777;font-size:13px;margin-bottom:18px}
+.fld{margin-bottom:14px}
+.fld label{display:block;font-size:13px;font-weight:500;margin-bottom:5px;color:#333}
+.fld label .req{color:#f45b24}
+.fld input,.fld select,.fld textarea{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:7px;
+  font:inherit;font-size:14px;background:#fff;color:#222}
+.fld input:focus,.fld select:focus,.fld textarea:focus{outline:2px solid #f45b24;outline-offset:-1px;border-color:#f45b24}
+.fld textarea{resize:vertical;min-height:74px}
+.fld .hint{font-size:12px;color:#888;margin-top:4px}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.radio{display:flex;gap:10px;margin-bottom:14px}
+.radio label{flex:1;border:2px solid #ddd;border-radius:8px;padding:11px 12px;cursor:pointer;text-align:center;
+  font-size:14px;font-weight:500;transition:.15s}
+.radio input{display:none}
+.radio input:checked+span{}
+.radio label:has(input:checked){border-color:#f45b24;background:#fff5f0;color:#f45b24}
+.sp-submit{width:100%;padding:14px;background:#f45b24;color:#fff;border:0;border-radius:8px;
+  font:inherit;font-size:16px;font-weight:600;cursor:pointer}
+.sp-submit:hover{background:#e0480f}
+.sp-submit:disabled{background:#ccc;cursor:not-allowed}
+.sp-note{font-size:12px;color:#888;text-align:center;margin-top:12px;line-height:1.5}
+.ok{background:#e8f7ee;border:1px solid #86d5a5;color:#14663a;padding:16px;border-radius:9px;margin-bottom:18px}
+.ok h3{margin:0 0 6px;font-size:16px}
+.ok p{margin:0 0 12px;font-size:14px}
+.err{background:#fdeceb;border:1px solid #f3a9a4;color:#8c2318;padding:11px;border-radius:7px;
+  font-size:14px;margin-bottom:14px}
+.plans{display:grid;gap:12px;margin-top:16px}
+.plan{border:2px solid #eee;border-radius:10px;padding:14px}
+.plan.hot{border-color:#f45b24;background:#fffaf7;position:relative}
+.plan .pt{font-weight:600;font-size:15px}
+.plan .pp{font-size:26px;font-weight:700;color:#f45b24;margin:2px 0 2px}
+.plan .pd{font-size:12px;color:#888;margin-bottom:9px}
+.plan ul{margin:0;padding-left:17px;font-size:13px;color:#555;line-height:1.75}
+.plan .tag{position:absolute;top:-9px;right:12px;background:#f45b24;color:#fff;font-size:10px;
+  padding:2px 9px;border-radius:10px;font-weight:600;text-transform:uppercase}
+.steps{counter-reset:s;margin:0;padding:0;list-style:none}
+.steps li{counter-increment:s;position:relative;padding:0 0 16px 36px;font-size:14px;color:#444;line-height:1.55}
+.steps li::before{content:counter(s);position:absolute;left:0;top:0;width:24px;height:24px;border-radius:50%;
+  background:#f45b24;color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.steps li b{display:block;color:#222;margin-bottom:2px}
+.faq{margin-top:10px}
+.faq details{border:1px solid #eee;border-radius:8px;padding:11px 13px;margin-bottom:8px;background:#fff}
+.faq summary{cursor:pointer;font-weight:500;font-size:14px;color:#222}
+.faq p{margin:9px 0 0;font-size:13px;color:#666;line-height:1.6}
+.sp-foot{text-align:center;padding:26px 16px 40px;color:#888;font-size:13px}
+.trust{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:18px;font-size:13px;color:#fff;opacity:.95}
+.trust a{color:#fff}
+</style>
+</head>
+<body>
+
+<div class="sp-hero">
+  <span class="sp-badge">Free to list · No brokerage on listing</span>
+  <h1>Sell or rent your Jaipur property faster</h1>
+  <p>Post once and reach buyers already searching by locality, budget and size.
+     We verify the listing and keep it live until it is actually sold.</p>
+  <div class="trust">
+    <span>✔ 763 live listings</span>
+    <span>✔ 11 verified sources</span>
+    <span>✔ Jaipur only</span>
+    <span>✔ You keep the buyer relationship</span>
+  </div>
+</div>
+
+<div class="sp-wrap">
+<div class="sp-2col">
+
+  <div class="sp-card">
+    <h2>List your property</h2>
+    <div class="sub">Takes 60 seconds. We call you to confirm and add photos.</div>
+
+    <form id="spForm" novalidate>
+      <div id="spOk" hidden></div>
+      <div id="spErr" hidden></div>
+
+      <div class="fld">
+        <label>What do you want to do? <span class="req">*</span></label>
+        <div class="radio">
+          <label><input type="radio" name="mode" value="sale" checked><span>Sell</span></label>
+          <label><input type="radio" name="mode" value="rent"><span>Rent it out</span></label>
+        </div>
+      </div>
+
+      <div class="fld">
+        <label>Property type <span class="req">*</span></label>
+        <select id="spType" required>
+          <option value="">Choose…</option>
+          <option>Flat / Apartment</option>
+          <option>House / Independent</option>
+          <option>Plot</option>
+          <option>Villa</option>
+          <option>Land / Farmland</option>
+          <option>Commercial / Office / Shop</option>
+        </select>
+      </div>
+
+      <div class="fld">
+        <label>Locality <span class="req">*</span></label>
+        <input id="spLoc" required placeholder="e.g. Vaishali Nagar, Jaipur" list="spLocs">
+        <datalist id="spLocs"></datalist>
+        <div class="hint">Jaipur only. Use the area buyers actually search for.</div>
+      </div>
+
+      <div class="f2">
+        <div class="fld">
+          <label>Price (₹) <span class="req">*</span></label>
+          <input id="spPrice" required inputmode="numeric" placeholder="e.g. 8500000">
+          <div class="hint">For rent, put the monthly rent.</div>
+        </div>
+        <div class="fld">
+          <label>Area (sq ft) <span class="req">*</span></label>
+          <input id="spArea" required inputmode="numeric" placeholder="e.g. 1500">
+        </div>
+      </div>
+
+      <div class="f2">
+        <div class="fld">
+          <label>Bedrooms</label>
+          <select id="spBeds">
+            <option value="">Not applicable</option>
+            <option>1</option><option>2</option><option>3</option>
+            <option>4</option><option>5+</option>
+          </select>
+        </div>
+        <div class="fld">
+          <label>Your name <span class="req">*</span></label>
+          <input id="spName" required placeholder="Owner name">
+        </div>
+      </div>
+
+      <div class="fld">
+        <label>WhatsApp number <span class="req">*</span></label>
+        <input id="spPhone" required inputmode="tel" placeholder="10-digit mobile">
+        <div class="hint">We use this to call you about the listing. It is never shown to buyers.</div>
+      </div>
+
+      <div class="fld">
+        <label>Anything we should know?</label>
+        <textarea id="spNote" placeholder="e.g. corner plot, ready to move, 4th floor with lift, loan approved…"></textarea>
+      </div>
+
+      <button type="submit" class="sp-submit" id="spBtn">Send my listing</button>
+      <div class="sp-note">
+        Your number goes only to our sales team.<br>
+        Buyers see our number, never yours — you decide when to talk.
+      </div>
+    </form>
+  </div>
+
+  <div>
+    <div class="sp-card" style="margin-bottom:18px">
+      <h2>How it works</h2>
+      <div class="sub">Three steps, no paperwork.</div>
+      <ol class="steps">
+        <li><b>You send the details</b>The form on the left. It takes about a minute.</li>
+        <li><b>We call you within 24 hours</b>To confirm the property, add photos and check the price.</li>
+        <li><b>Buyers find it</b>It goes live in the normal listings, with your area, size and price filters.</li>
+      </ol>
+    </div>
+
+    <div class="sp-card" style="margin-bottom:18px">
+      <h2>Optional boost</h2>
+      <div class="sub">Start free. Pay only when you want more reach.</div>
+      <div class="plans">
+        <div class="plan">
+          <div class="pt">Free</div>
+          <div class="pp">₹0</div>
+          <div class="pd">Forever</div>
+          <ul>
+            <li>Listed in the main search</li>
+            <li>Buyers can call/WhatsApp us</li>
+            <li>Stays live until sold</li>
+          </ul>
+        </div>
+        <div class="plan hot">
+          <span class="tag">Most popular</span>
+          <div class="pt">Featured listing</div>
+          <div class="pp">₹499<span style="font-size:14px;color:#888">/month</span></div>
+          <div class="pd">Per property, cancel any time</div>
+          <ul>
+            <li>Everything in Free</li>
+            <li>Pinned first in its locality</li>
+            <li>PREMIUM badge on the card</li>
+            <li>Shown to buyers slightly over budget</li>
+            <li>Monthly demand report on WhatsApp</li>
+          </ul>
+        </div>
+      </div>
+      <div class="sp-note" style="text-align:left;margin-top:12px">
+        Payment by UPI on WhatsApp. No card, no gateway, no lock-in.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="sp-card faq" style="margin-top:26px">
+  <h2>Common questions</h2>
+  <div class="faq">
+    <details><summary>Is listing really free?</summary>
+      <p>Yes. The form and a basic listing cost nothing. We make money when a buyer
+         connects to a property, not by charging you to post.</p></details>
+    <details><summary>Will buyers get my phone number?</summary>
+      <p>No. Buyers see only our number and message us. We pass on your details
+         after you agree to talk, so you never get unwanted calls.</p></details>
+    <details><summary>Do you take a cut when it sells?</summary>
+      <p>Only if you ask us to handle the deal, and we agree the percentage with
+         you first. Listing alone is free and carries no obligation.</p></details>
+    <details><summary>How long does it take to go live?</summary>
+      <p>Usually same day once we have confirmed the details and photos.</p></details>
+    <details><summary>What if my property is already on a portal?</summary>
+      <p>That is fine. We do not ask you to remove it anywhere. Our listing is
+         extra reach, especially for buyers searching by area and budget.</p></details>
+  </div>
+</div>
+</div>
+
+<div class="sp-foot">
+  <a href="./">← Back to listings</a>
+  <p style="margin-top:10px">JaipurEst · Jaipur property, verified daily</p>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  const $ = (s) => document.querySelector(s);
+  // The seller form is the one thing a seller sees while we are offline, so
+  // both the endpoint and the number come from meta.json (which the inventory
+  // cron regenerates) instead of being hardcoded here where they rot.
+  let EP = "", WA = "";
+
+  // Populate the locality list from the live inventory, so a seller types a name
+  // that already matches a buyer-side filter. No new endpoint needed.
+  fetch("data/meta.json")
+    .then((r) => r.json())
+    .then((m) => {
+      EP = (m.site && m.site.lead_endpoint) || "";
+      // Bare 10 digits; the "91" prefix is added when the wa.me link is built,
+      // so keeping it here too would produce wa.me/9191...
+      WA = ((m.site && m.site.whatsapp) || "").replace(/^91/, "");
+      const locs = (m.localities || m.top_localities || []).slice(0, 60);
+      $("#spLocs").innerHTML = locs
+        .map((l) => (typeof l === "string" ? l : l.name))
+        .filter(Boolean)
+        .map((l) => `<option value="${l}">`)
+        .join("");
+    })
+    .catch(() => {});
+
+  $("#spForm").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const err = $("#spErr"), ok = $("#spOk"), btn = $("#spBtn");
+    err.hidden = true; ok.hidden = true;
+
+    // meta.json must have loaded first — without EP there is nowhere to send
+    // the lead, and a seller who fills the form in two seconds must not get a
+    // silent failure.
+    if (!EP) {
+      err.textContent = "Still loading. Please try again in a moment, or WhatsApp us on +91 " + (WA || "9660670160") + ".";
+      err.hidden = false;
+      return;
+    }
+
+    const num = (id) => ($("#" + id).value || "").replace(/[^\d]/g, "");
+    const body = {
+      kind: "seller",
+      mode: (document.querySelector('input[name="mode"]:checked') || {}).value,
+      ptype: $("#spType").value,
+      locality: $("#spLoc").value.trim(),
+      price: $("#spPrice").value.trim(),
+      area: $("#spArea").value.trim(),
+      beds: $("#spBeds").value,
+      name: $("#spName").value.trim(),
+      phone: $("#spPhone").value.trim(),
+      message: $("#spNote").value.trim(),
+    };
+
+    // Client-side validation mirrors the Worker's own rules. It is a courtesy,
+    // not the guard: the Worker re-validates everything we send.
+    const miss = [];
+    if (!body.ptype) miss.push("property type");
+    if (!body.locality) miss.push("locality");
+    if (!body.price) miss.push("price");
+    if (!body.area) miss.push("area");
+    if (!body.name) miss.push("name");
+    if (!/^\d{10}$/.test(num("spPhone"))) miss.push("a 10-digit phone number");
+    if (miss.length) {
+      err.textContent = "Please fill: " + miss.join(", ") + ".";
+      err.hidden = false;
+      $("#" + (miss.includes("locality") ? "spLoc" : "spName")).focus();
+      return;
+    }
+    if (!/^\d{3,}$/.test(num("spPrice"))) {
+      err.textContent = "Price must be a number (no L, Cr or commas).";
+      err.hidden = false;
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Sending…";
+    try {
+      const res = await fetch(EP, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (res.status === 200) {
+        const wa = "https://wa.me/91" + WA +
+          "?text=" + encodeURIComponent(
+            "Hi, I just sent my property details to JaipurEst. " +
+            "My name is " + body.name + " and the property is in " + body.locality + "."
+          );
+        ok.innerHTML =
+          '<h3>✔ Got it. We will call you shortly.</h3>' +
+          '<p>To speed things up, send us a WhatsApp now — it goes straight to the sales team.</p>' +
+          '<a href="' + wa + '" style="display:inline-block;background:#25D366;color:#fff;padding:11px 20px;' +
+          'border-radius:7px;text-decoration:none;font-weight:600">WhatsApp us</a>';
+        ok.hidden = false;
+        $("#spForm").querySelectorAll(".fld, .radio, button").forEach((n) => (n.style.display = "none"));
+        ok.scrollIntoView({ behavior: "smooth", block: "center" });
+      } else {
+        const j = await res.json().catch(() => ({}));
+        err.textContent = j.error || "Could not send. Please WhatsApp us instead.";
+        err.hidden = false;
+      }
+    } catch (e) {
+      err.textContent = "Network problem. Please WhatsApp us on +91 " + WA + " instead.";
+      err.hidden = false;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Send my listing";
+    }
+  });
+})();
+</script>
+</body>
+</html>
