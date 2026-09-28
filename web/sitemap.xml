@@ -3,12 +3,10 @@
   <url><loc>https://jaipurest.pages.dev/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
   <url><loc>https://jaipurest.pages.dev/localities/</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://jaipurest.pages.dev/localities/ajmer-road/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
-  <url><loc>https://jaipurest.pages.dev/localities/bagru/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
   <url><loc>https://jaipurest.pages.dev/localities/bani-park/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
   <url><loc>https://jaipurest.pages.dev/localities/bhagurh-nagar-1/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
   <url><loc>https://jaipurest.pages.dev/localities/chaksu/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
   <url><loc>https://jaipurest.pages.dev/localities/durgapura/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
-  <url><loc>https://jaipurest.pages.dev/localities/gandhi-path/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
   <url><loc>https://jaipurest.pages.dev/localities/gopalpura-bypass/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
   <url><loc>https://jaipurest.pages.dev/localities/jagatpura/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
   <url><loc>https://jaipurest.pages.dev/localities/jaipur/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
@@ -16,6 +14,7 @@
   <url><loc>https://jaipurest.pages.dev/localities/kalwar/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
   <url><loc>https://jaipurest.pages.dev/localities/malviya-nagar/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
   <url><loc>https://jaipurest.pages.dev/localities/mansarovar/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://jaipurest.pages.dev/localities/muhana/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
   <url><loc>https://jaipurest.pages.dev/localities/patrakar-colony/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
   <url><loc>https://jaipurest.pages.dev/localities/pratap-nagar/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
   <url><loc>https://jaipurest.pages.dev/localities/sanganer/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
