@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://jaipurest.pages.dev/sitemap.xml
+Sitemap: https://acrekeys.com/sitemap.xml
