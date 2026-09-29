@@ -57,20 +57,19 @@ img { display: block; }
   background: var(--bg); border: 1px solid var(--line);
   border-radius: 999px; padding: 9px 16px; color: var(--ink-3);
   max-width: 560px;
-  /* 9px padding + an 18px input box = a 38px tap target, under the 44px
-     minimum (WCAG 2.5.5 / iOS HIG). On a phone that is the difference
-     between hitting search and hitting the logo above it, so the input is
-     given real height instead of the padding absorbing the difference. */
+  /* 9px padding + an 18px input box made this a 38px tap target, under the
+     44px minimum (WCAG 2.5.5 / iOS HIG). The bar is what a thumb actually
+     lands on, so the bar gets the height -- not just the text box inside it. */
   min-height: 44px;
+  cursor: text;
 }
 .search input {
   border: 0; outline: 0; background: transparent; width: 100%;
   font-size: 14px; color: var(--ink); min-height: 24px;
+  /* stretch, so the tappable area is the full height of the pill rather than
+     the 24px text line sitting in the middle of it */
+  align-self: stretch;
 }
-/* Tapping anywhere in the pill should open the keyboard, not just the 18px
-   text box inside it -- the bar is what the thumb actually lands on. */
-.search { cursor: text; }
-.search input { align-self: stretch; }
 .updated {
   font-size: 12px; color: var(--ink-3); white-space: nowrap;
   background: var(--bg); border: 1px solid var(--line);
