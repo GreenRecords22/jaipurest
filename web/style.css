@@ -57,11 +57,20 @@ img { display: block; }
   background: var(--bg); border: 1px solid var(--line);
   border-radius: 999px; padding: 9px 16px; color: var(--ink-3);
   max-width: 560px;
+  /* 9px padding + an 18px input box = a 38px tap target, under the 44px
+     minimum (WCAG 2.5.5 / iOS HIG). On a phone that is the difference
+     between hitting search and hitting the logo above it, so the input is
+     given real height instead of the padding absorbing the difference. */
+  min-height: 44px;
 }
 .search input {
   border: 0; outline: 0; background: transparent; width: 100%;
-  font-size: 14px; color: var(--ink);
+  font-size: 14px; color: var(--ink); min-height: 24px;
 }
+/* Tapping anywhere in the pill should open the keyboard, not just the 18px
+   text box inside it -- the bar is what the thumb actually lands on. */
+.search { cursor: text; }
+.search input { align-self: stretch; }
 .updated {
   font-size: 12px; color: var(--ink-3); white-space: nowrap;
   background: var(--bg); border: 1px solid var(--line);
@@ -388,6 +397,14 @@ select:focus, input:focus { border-color: var(--acc); }
   .specs { gap: 9px; font-size: 11.5px; }
   .card-body { padding: 10px 10px 26px; }
   .tab { padding: 7px 12px; font-size: 14px; }
+  /* Same 44px floor (WCAG 2.5.5). On a touch screen a 32px arrow is a coin
+     toss between the photo and the next one, and the close button is the one
+     control a buyer reaches for to escape a modal on mobile. */
+  .modal-x { width: 44px; height: 44px; font-size: 18px; right: 8px; top: 8px; }
+  .gal-nav { width: 44px; height: 44px; font-size: 22px; }
+  .g-prev { left: 4px; } .g-next { right: 4px; }
+  .pill { padding: 9px 15px; }
+  select, input[type=time], input[type=text] { min-height: 44px; }
 }
 
 /* ---------- photo gallery: card pill + modal thumbs + lightbox ---------- */
