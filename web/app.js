@@ -120,7 +120,15 @@ function similarLink(r) {
   if (r.locality) p.set("loc", r.locality);
   if (state.tab === "rent" || r.listing_type === "rent") p.set("tab", "rent");
   if (r.property_type) p.set("cat", r.property_type);
-  if (r.bedrooms) p.set("beds", String(r.bedrooms));
+  // Only carry `beds` for a property type that actually has bedrooms. The
+  // matcher does `const b = r.bedrooms || 0`, so a house/plot/farmhouse whose
+  // bedroom count is null scores 0 against `beds=2` and the page renders
+  // "No listings match these filters" -- on a link the site itself generated.
+  // That is worse than sending no filter at all: the buyer taps through from
+  // WhatsApp onto an error page, which reads as the whole product being broken.
+  // A broad link that lands on results is strictly better than a precise one
+  // that lands on an empty state.
+  if (r.bedrooms && r.property_type === "flat") p.set("beds", String(r.bedrooms));
   const base = location.origin + location.pathname;
   return base + (p.toString() ? "#" + p.toString() : "");
 }
