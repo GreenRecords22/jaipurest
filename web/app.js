@@ -263,6 +263,10 @@ function cardHTML(r) {
       ${img}
       ${npx}
       <div class="badges">${badges}</div>
+      <button class="card-share" type="button" data-share="${esc(r.id)}"
+              aria-label="Share this property" title="Share">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M18 16.08a2.9 2.9 0 0 0-1.96.77L8.91 12.7a3.3 3.3 0 0 0 0-1.4l7.05-4.11A2.99 2.99 0 1 0 15 5a3.3 3.3 0 0 0 .05.7L7.94 9.81a3 3 0 1 0 0 4.38l7.12 4.16a2.82 2.82 0 0 0-.08.65A2.92 2.92 0 1 0 18 16.08z"/></svg>
+      </button>
     </div>
     <div class="card-body">
       <div class="price">${priceTxt} ${priceSub}</div>
@@ -380,6 +384,24 @@ function countView(ref) {
   } catch (e) { /* a lost view must never break the page */ }
 }
 
+// Share options shown in our own sheet. The OS share sheet is deliberately not
+// the first thing offered: on Android it is a second tap deep, and WhatsApp is
+// the channel that actually matters here, so it gets a row of its own.
+const SHARE_TARGETS = [
+  { id: "whatsapp", label: "WhatsApp", tint: "#25D366",
+    url: (t, u) => "https://wa.me/?text=" + encodeURIComponent(t + " " + u) },
+  { id: "facebook", label: "Facebook", tint: "#1877F2",
+    url: (t, u) => "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(u) },
+  { id: "x", label: "X", tint: "#000000",
+    url: (t, u) => "https://twitter.com/intent/tweet?text=" + encodeURIComponent(t + " " + u) },
+  { id: "linkedin", label: "LinkedIn", tint: "#0A66C2",
+    url: (t, u) => "https://www.linkedin.com/sharing/share-offsite/?url=" + encodeURIComponent(u) },
+  { id: "telegram", label: "Telegram", tint: "#229ED9",
+    url: (t, u) => "https://t.me/share/url?url=" + encodeURIComponent(u) + "&text=" + encodeURIComponent(t) },
+  { id: "email", label: "Email", tint: "#5B6472",
+    url: (t, u) => "mailto:?subject=" + encodeURIComponent(t) + "&body=" + encodeURIComponent(t + " " + u) },
+];
+
 // One listing -> one link the buyer can drop into a family WhatsApp group.
 // A share is a referral, which is the cheapest lead source we have, so it has
 // to work on the platform most Indian buyers actually use: WhatsApp on a phone.
@@ -394,19 +416,94 @@ async function shareListing(r, btn) {
     url,
   };
   const label = btn ? btn.textContent : "";
-  if (navigator.share) {
+
+  // Our own sheet first. navigator.share is still offered as the last row
+  // ("More") because on iOS it is the only route to Contacts, AirDrop and the
+  // apps we do not enumerate, but it must not be the first tap or the common
+  // case costs an extra screen.
+  openShareSheet(r, data, btn);
+}
+
+// The share sheet itself. Click-off and Escape both close it, and the row that
+// opened it keeps focus so keyboard users are not dumped back at the top.
+function openShareSheet(r, data, btn) {
+  let sheet = $("#shareSheet");
+  if (sheet) sheet.remove();
+  const cap = `${typeLabel(r.property_type)} in ${r.locality || "Jaipur"}`;
+
+  const rows = SHARE_TARGETS.map((t) => `
+    <a class="share-row" href="${esc(t.url(data.text, data.url))}"
+       target="_blank" rel="noopener noreferrer" data-share-target="${t.id}">
+      <span class="share-ico" style="background:${t.tint}" aria-hidden="true">${esc(t.label[0])}</span>
+      <span class="share-lbl">${esc(t.label)}</span>
+    </a>`).join("");
+
+  const wrap = document.createElement("div");
+  wrap.id = "shareSheet";
+  wrap.className = "share-backdrop";
+  wrap.innerHTML = `
+    <div class="share-panel" role="dialog" aria-modal="true" aria-label="Share this property">
+      <div class="share-head">
+        <img class="share-thumb" src="${esc((r.images || [])[0] || "")}" alt="" onerror="this.style.visibility='hidden'">
+        <div class="share-cap">
+          <b>${esc(r.title || "Property")}</b>
+          <span>${esc(cap)} · ${esc(r.price != null ? inr(r.price) : "price on call")}</span>
+        </div>
+        <button class="share-x" type="button" aria-label="Close share">&times;</button>
+      </div>
+      <div class="share-grid">${rows}</div>
+      <div class="share-foot">
+        <button class="share-foot-btn" type="button" data-share-copy>
+          <span class="share-ico share-ico-copy" aria-hidden="true">⧉</span> Copy link
+        </button>
+        ${navigator.share ? `<button class="share-foot-btn" type="button" data-share-more>
+          <span class="share-ico share-ico-copy" aria-hidden="true">⋯</span> More apps
+        </button>` : ""}
+      </div>
+    </div>`;
+  document.body.appendChild(wrap);
+
+  const close = () => { wrap.remove(); document.removeEventListener("keydown", onKey); if (btn) btn.focus(); };
+  const onKey = (e) => { if (e.key === "Escape") close(); };
+  document.addEventListener("keydown", onKey);
+  wrap.addEventListener("click", (e) => { if (e.target === wrap) close(); });
+  wrap.querySelector(".share-x").onclick = close;
+
+  wrap.querySelectorAll("[data-share-target]").forEach((a) => {
+    a.addEventListener("click", () => {
+      // WhatsApp and Telegram are apps on the phone: the share is done when the
+      // intent opens, and keeping the sheet up behind it looks broken.
+      if (["whatsapp", "telegram"].includes(a.dataset.shareTarget)) close();
+    });
+  });
+
+  const copyBtn = wrap.querySelector("[data-share-copy]");
+  if (copyBtn) copyBtn.onclick = async () => {
+    close();
+    await copyShare(data, null);
+  };
+  const moreBtn = wrap.querySelector("[data-share-more]");
+  if (moreBtn) moreBtn.onclick = async () => {
     try {
       await navigator.share(data);
-      return;
+      close();
     } catch (e) {
-      // AbortError = the user closed the sheet. Do not fall through to the
-      // clipboard: silently overwriting their clipboard after they backed out
-      // is rude, and it hides the fact they chose not to share.
-      if (e && e.name === "AbortError") return;
+      if (e && e.name === "AbortError") return;  // backed out; leave it open
     }
-  }
+  };
+
+  const first = wrap.querySelector(".share-row");
+  if (first) first.focus();
+}
+
+// Clipboard copy, shared by the sheet's "Copy link" row and the desktop path.
+// ponytail: execCommand fallback is deprecated but is the only thing that works
+// when the Clipboard API is denied; drop both if the sheet's copy row is enough.
+async function copyShare(data, btn) {
+  // No navigator.share here on purpose: this row promises a copy, and opening
+  // the OS share sheet from a button labelled "Copy link" is a bait-and-switch.
   // Desktop and older Android: copy instead of doing nothing.
-  const payload = `${data.text}\n${url}`;
+  const payload = `${data.text}\n${data.url}`;
   try {
     await navigator.clipboard.writeText(payload);
     toast("Link copied — paste it anywhere");
@@ -710,6 +807,15 @@ function bind() {
   $("#more").addEventListener("click", () => { state.page++; render(); });
   $("#filterToggle").addEventListener("click", () => $("#filters").classList.toggle("open"));
   $("#grid").addEventListener("click", (e) => {
+    // The share button lives inside the card, so without this guard every
+    // share tap also opened the listing modal behind the share sheet.
+    const sh = e.target.closest("[data-share]");
+    if (sh) {
+      const r = currentList().find((x) => x.id === sh.dataset.share) ||
+                ACTIVE.find((x) => x.id === sh.dataset.share);
+      if (r) shareListing(r, sh);
+      return;
+    }
     const c = e.target.closest(".card"); if (c) openModal(c.dataset.id);
   });
   $("#modalX").addEventListener("click", closeModal);

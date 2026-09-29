@@ -469,6 +469,86 @@ select:focus, input:focus { border-color: var(--acc); }
 
 /* The transient "link copied" confirmation. Fixed so it clears the sticky
    header on a phone instead of hiding behind it. */
+/* The per-card share button. Sits in the image's top-right corner, opposite the
+   badge row, so it never collides with the badge text however long that gets.
+   44px is the touch minimum (WCAG 2.5.5); a 32px icon in the corner is the one
+   control on the card that gets mis-tapped while thumbing the photo. */
+.card-share {
+  position: absolute; top: 10px; right: 10px; z-index: 5;
+  width: 44px; height: 44px; display: grid; place-items: center;
+  border: 0; border-radius: 50%; cursor: pointer;
+  background: rgba(255, 255, 255, .92); color: #14161c;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .22);
+  transition: transform .12s, background .12s;
+}
+.card-share:hover { background: #fff; transform: scale(1.06); }
+.card-share:active { transform: scale(.94); }
+.card-share:focus-visible { outline: 3px solid var(--acc); outline-offset: 2px; }
+
+/* --- share sheet --------------------------------------------------------- */
+.share-backdrop {
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(8, 9, 12, .55);
+  display: flex; align-items: flex-end; justify-content: center;
+  animation: shareFade .16s ease-out;
+}
+@keyframes shareFade { from { opacity: 0; } to { opacity: 1; } }
+.share-panel {
+  width: 100%; max-width: 480px;
+  background: var(--card); color: var(--ink);
+  border-radius: 18px 18px 0 0;
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -8px 40px rgba(0, 0, 0, .34);
+  animation: shareUp .2s cubic-bezier(.2, .8, .3, 1);
+}
+@keyframes shareUp { from { transform: translateY(22px); } to { transform: translateY(0); } }
+.share-head { display: flex; gap: 12px; align-items: center; margin-bottom: 14px; }
+.share-thumb {
+  width: 46px; height: 46px; border-radius: 9px; object-fit: cover;
+  background: rgba(127, 127, 127, .18); flex: none;
+}
+.share-cap { min-width: 0; flex: 1; }
+.share-cap b { display: block; font-size: 14px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.share-cap span { display: block; font-size: 12.5px; color: var(--ink-2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+.share-x {
+  flex: none; width: 44px; height: 44px; border: 0; border-radius: 50%;
+  background: rgba(127, 127, 127, .14); color: var(--ink);
+  font-size: 26px; line-height: 1; cursor: pointer;
+}
+.share-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.share-row {
+  display: flex; flex-direction: column; align-items: center; gap: 7px;
+  padding: 12px 4px; border-radius: 12px; text-decoration: none;
+  color: var(--ink); min-height: 88px; justify-content: center;
+}
+.share-row:hover { background: rgba(127, 127, 127, .1); }
+.share-row:focus-visible { outline: 2px solid var(--acc); outline-offset: -2px; }
+.share-ico {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: grid; place-items: center; color: #fff;
+  font-size: 16px; font-weight: 700; flex: none;
+}
+.share-lbl { font-size: 12px; font-weight: 500; color: var(--ink-2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.share-foot { display: flex; gap: 8px; margin-top: 10px; }
+.share-foot-btn {
+  flex: 1; min-height: 46px; display: flex; align-items: center;
+  justify-content: center; gap: 8px; cursor: pointer;
+  border: 1px solid var(--line); border-radius: 12px;
+  background: transparent; color: var(--ink);
+  font-size: 13.5px; font-weight: 500; font-family: inherit;
+}
+.share-foot-btn:hover { background: rgba(127, 127, 127, .09); }
+.share-ico-copy { background: rgba(127, 127, 127, .18); color: var(--ink); font-size: 15px; }
+
+/* Sheet as a centred dialog on a wide screen, a bottom sheet on a phone. */
+@media (min-width: 700px) {
+  .share-backdrop { align-items: center; }
+  .share-panel { border-radius: 18px; padding-bottom: 16px; }
+}
+
 .toast {
   position: fixed; left: 50%; bottom: 22px; transform: translate(-50%, 16px);
   z-index: 200; max-width: min(92vw, 420px);
