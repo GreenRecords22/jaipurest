@@ -400,8 +400,6 @@ select:focus, input:focus { border-color: var(--acc); }
      toss between the photo and the next one, and the close button is the one
      control a buyer reaches for to escape a modal on mobile. */
   .modal-x { width: 44px; height: 44px; font-size: 18px; right: 8px; top: 8px; }
-  .gal-nav { width: 44px; height: 44px; font-size: 22px; }
-  .g-prev { left: 4px; } .g-next { right: 4px; }
   .pill { padding: 9px 15px; }
   select, input[type=time], input[type=text] { min-height: 44px; }
   /* The remaining controls measured 34-38px on a phone. A thumb is ~45px wide,
@@ -432,6 +430,14 @@ select:focus, input:focus { border-color: var(--acc); }
 }
 .gal-nav:hover { background: var(--acc); }
 .g-prev { left: 8px; } .g-next { right: 8px; }
+/* The base box is 32px, fine for a mouse but under the 44px touch minimum
+   (WCAG 2.5.5). This override sits AFTER the base rules on purpose: at equal
+   specificity the later declaration wins, so putting it earlier -- inside the
+   other media query -- is what left the arrows at 32px on a phone. */
+@media (max-width: 560px) {
+  .gal-nav { width: 44px; height: 44px; font-size: 22px; }
+  .g-prev { left: 4px; } .g-next { right: 4px; }
+}
 .gal-count {
   position: absolute; right: 9px; bottom: 9px; z-index: 4;
   background: rgba(10, 10, 14, .7); color: #fff;
