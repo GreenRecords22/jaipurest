@@ -404,6 +404,14 @@ select:focus, input:focus { border-color: var(--acc); }
   .g-prev { left: 4px; } .g-next { right: 4px; }
   .pill { padding: 9px 15px; }
   select, input[type=time], input[type=text] { min-height: 44px; }
+  /* The remaining controls measured 34-38px on a phone. A thumb is ~45px wide,
+     so these are the taps that miss: the brand (home), "+ List your property"
+     (the revenue path), and the tab/pill filters that decide WHAT a buyer sees.
+     padding alone cannot lift them -- flex line-height caps the box -- so the
+     height is set directly. */
+  .tab, .pill { min-height: 44px; display: inline-flex; align-items: center; }
+  .sell-link { min-height: 44px; display: inline-flex; align-items: center; }
+  .brand { min-height: 44px; }
 }
 
 /* ---------- photo gallery: card pill + modal thumbs + lightbox ---------- */
