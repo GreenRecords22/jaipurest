@@ -1,4 +1,4 @@
-/* JaipurEst — housing.com-inspired light portal theme */
+/* Acre Keys — housing.com-inspired light portal theme */
 
 :root {
   --acc: #f45b24;            /* portal orange */
@@ -224,7 +224,7 @@ select:focus, input:focus { border-color: var(--acc); }
 }
 /* branded corner stamp — our identity on every photo */
 .card-img::after{
-  content: "JaipurEst";
+  content: "Acre Keys";
   position: absolute; left: 8px; bottom: 8px;
   font-size: 10px; font-weight: 700; letter-spacing: .05em;
   color: rgba(255,255,255,.95);
@@ -437,7 +437,47 @@ select:focus, input:focus { border-color: var(--acc); }
 @media (max-width: 560px) {
   .gal-nav { width: 44px; height: 44px; font-size: 22px; }
   .g-prev { left: 4px; } .g-next { right: 4px; }
+
+  /* Header layout. On a 375px phone the four nowrap children of .topbar-in --
+     brand, search, "refreshing" badge, "+ List your property" -- were sharing one
+     flex line with an 18px gap. The search pill collapsed to a sliver and the
+     row read as a broken toolbar. Two rows instead: identity + the revenue CTA
+     on top, search full-width beneath.
+     The badge is dropped, not shrunk: it is a 12px status string that only
+     means something to us, and it is the one item that can be regenerated from
+     the data. Content beats chrome. */
+  .topbar-in {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "brand sell" "search search";
+    gap: 10px 12px;
+    padding: 10px 14px;
+    align-items: center;
+  }
+  .brand { grid-area: brand; min-width: 0; }
+  .sell-link { grid-area: sell; }
+  .search { grid-area: search; width: 100%; }
+  .updated { display: none; }
+
+  /* The share/call row in the modal gains a button, so on a narrow screen let
+     the two CTAs share a line and keep the full width for the primary action
+     rather than wrapping into an unpredictable stack. */
+  .m-actions { flex-wrap: wrap; }
+  .m-actions .btn { flex: 1 1 44%; }
+  .m-actions .btn-primary { flex: 1 1 100%; }
 }
+
+/* The transient "link copied" confirmation. Fixed so it clears the sticky
+   header on a phone instead of hiding behind it. */
+.toast {
+  position: fixed; left: 50%; bottom: 22px; transform: translate(-50%, 16px);
+  z-index: 200; max-width: min(92vw, 420px);
+  background: #14161c; color: #fff; font-size: 14px; font-weight: 500;
+  padding: 12px 18px; border-radius: 12px; line-height: 1.35;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, .3);
+  opacity: 0; pointer-events: none; transition: opacity .18s, transform .18s;
+}
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
 .gal-count {
   position: absolute; right: 9px; bottom: 9px; z-index: 4;
   background: rgba(10, 10, 14, .7); color: #fff;

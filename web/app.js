@@ -18,6 +18,16 @@ const GROUPS = {
                "commercial", "shop", "office", "industrial", "warehouse", "retail"],
 };
 
+// The group a raw `property_type` belongs to, or "" if it is in none.
+// similarLink() has to translate: GROUPS is keyed by the UI's plural tab
+// names ("flats", "houses"), but a listing's `property_type` is singular
+// ("apartment", "independent_house"). Emitting the raw type put
+// "#cat=apartment" in the URL, GROUPS["apartment"] was undefined, `|| []` made
+// it an empty allow-list, and every listing was rejected -- so the site handed
+// buyers a link that always rendered "No listings match these filters".
+const CAT_OF_TYPE = {};
+for (const [g, types] of Object.entries(GROUPS)) for (const t of types) CAT_OF_TYPE[t] = g;
+
 const SOURCE_LABELS = {
   "ninety9acres": "99acres", "magicbricks": "Magicbricks",
   "khaliplot": "KhaliPlot", "flatsdekho": "FlatsDekho",
@@ -37,6 +47,26 @@ let ACTIVE = [], SOLD = [], META = {};
 /* ---------------------------------------------------------------- helpers */
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g,
   (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+// A transient confirmation. aria-live so a screen reader announces the copy
+// result too -- a share that silently copies is indistinguishable from a share
+// button that did nothing.
+let toastTimer = null;
+function toast(msg) {
+  let el = $("#toast");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "toast";
+    el.className = "toast";
+    el.setAttribute("role", "status");
+    el.setAttribute("aria-live", "polite");
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.classList.add("on");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("on"), 2600);
+}
 
 function inr(n) {
   if (n == null) return "—";
@@ -101,7 +131,7 @@ function waLink(r) {
   const ref = refCode(r.id);
   const more = similarLink(r);
   const msg =
-    `Hi JaipurEst! I'm interested in ${ref} — ${r.title} (${price}, ${r.locality || "Jaipur"}).\n` +
+    `Hi Acre Keys! I'm interested in ${ref} — ${r.title} (${price}, ${r.locality || "Jaipur"}).\n` +
     `More options in the same area: ${more}`;
   return `https://wa.me/${waNum()}?text=${encodeURIComponent(msg)}`;
 }
@@ -119,7 +149,12 @@ function similarLink(r) {
   const p = new URLSearchParams();
   if (r.locality) p.set("loc", r.locality);
   if (state.tab === "rent" || r.listing_type === "rent") p.set("tab", "rent");
-  if (r.property_type) p.set("cat", r.property_type);
+  if (r.property_type) {
+    const g = CAT_OF_TYPE[r.property_type];
+    // An unmapped type must be OMITTED, not passed through: `state.cat` is
+    // looked up in GROUPS and an unknown key silently matches nothing.
+    if (g) p.set("cat", g);
+  }
   // Only carry `beds` for a property type that actually has bedrooms. The
   // matcher does `const b = r.bedrooms || 0`, so a house/plot/farmhouse whose
   // bedroom count is null scores 0 against `beds=2` and the page renders
@@ -128,7 +163,7 @@ function similarLink(r) {
   // WhatsApp onto an error page, which reads as the whole product being broken.
   // A broad link that lands on results is strictly better than a precise one
   // that lands on an empty state.
-  if (r.bedrooms && r.property_type === "flat") p.set("beds", String(r.bedrooms));
+  if (r.bedrooms && CAT_OF_TYPE[r.property_type] === "flats") p.set("beds", String(r.bedrooms));
   const base = location.origin + location.pathname;
   return base + (p.toString() ? "#" + p.toString() : "");
 }
@@ -345,6 +380,53 @@ function countView(ref) {
   } catch (e) { /* a lost view must never break the page */ }
 }
 
+// One listing -> one link the buyer can drop into a family WhatsApp group.
+// A share is a referral, which is the cheapest lead source we have, so it has
+// to work on the platform most Indian buyers actually use: WhatsApp on a phone.
+async function shareListing(r, btn) {
+  // Deep-link to the listing so the person receiving it lands on that property,
+  // not the homepage. The site is fully client-side, so #q= is the honest way
+  // to point at a specific record.
+  const url = location.origin + location.pathname + "#q=" + encodeURIComponent(refCode(r.id));
+  const data = {
+    title: `${r.title} — ${r.price != null ? inr(r.price) : "Price on call"}`,
+    text: `${typeLabel(r.property_type)} in ${r.locality || "Jaipur"} · ${r.price != null ? inr(r.price) : "price on call"} · Ref ${refCode(r.id)}`,
+    url,
+  };
+  const label = btn ? btn.textContent : "";
+  if (navigator.share) {
+    try {
+      await navigator.share(data);
+      return;
+    } catch (e) {
+      // AbortError = the user closed the sheet. Do not fall through to the
+      // clipboard: silently overwriting their clipboard after they backed out
+      // is rude, and it hides the fact they chose not to share.
+      if (e && e.name === "AbortError") return;
+    }
+  }
+  // Desktop and older Android: copy instead of doing nothing.
+  const payload = `${data.text}\n${url}`;
+  try {
+    await navigator.clipboard.writeText(payload);
+    toast("Link copied — paste it anywhere");
+  } catch (e) {
+    // Clipboard API needs a secure context and can still be denied. A select()
+    // on a temporary textarea works in every browser that can run this script.
+    const ta = document.createElement("textarea");
+    ta.value = payload;
+    ta.setAttribute("readonly", "");
+    ta.style.cssText = "position:fixed;top:-1000px;opacity:0";
+    document.body.appendChild(ta);
+    ta.select();
+    let okc = false;
+    try { okc = document.execCommand("copy"); } catch (e2) { okc = false; }
+    document.body.removeChild(ta);
+    toast(okc ? "Link copied — paste it anywhere" : "Copy failed — long-press the address bar instead");
+  }
+  if (btn) { btn.textContent = "✓ Copied"; setTimeout(() => (btn.textContent = label || "🔗 Share"), 1800); }
+}
+
 function openModal(id) {
   const r = currentList().find((x) => x.id === id) || ACTIVE.find((x) => x.id === id);
   if (!r) return;
@@ -386,6 +468,7 @@ function openModal(id) {
       <div class="m-actions">
         <a class="btn btn-primary" href="${esc(waLink(r))}" target="_blank" rel="noopener">💬 WhatsApp our property agent</a>
         <a class="btn btn-ghost" href="${esc(telLink())}">📞 Call us</a>
+        <button class="btn btn-ghost" type="button" id="modalShare">🔗 Share</button>
         <button class="btn btn-ghost" id="modalClose2">Close</button>
       </div>
       <details class="m-funnel">
@@ -397,7 +480,7 @@ function openModal(id) {
           <input id="bkPhone" required type="tel" inputmode="tel" maxlength="16" pattern="[0-9+ ]{8,16}" placeholder="Mobile number *" autocomplete="tel">
           <input id="bkBudget" maxlength="40" placeholder="Budget (e.g. 60 L) — optional">
           <select id="bkMode">
-            <option>Meet our sales executive at the JaipurEst office</option>
+            <option>Meet our sales executive at the Acre Keys office</option>
             <option>Meet at a public place near me</option>
             <option>Straight to the property site visit</option>
           </select>
@@ -416,6 +499,8 @@ function openModal(id) {
   if (gal.length > 1) bindGallery(r, gal);
   const c2 = $("#modalClose2");
   if (c2) c2.onclick = closeModal;
+  const sh = $("#modalShare");
+  if (sh) sh.onclick = () => shareListing(r, sh);
   const bf = $("#bookForm");
   if (bf) bf.onsubmit = (e) => {
     e.preventDefault();
@@ -440,7 +525,7 @@ function openModal(id) {
       `Budget: ${payload.budget}\n` +
       `Meeting: ${payload.mode}\n` +
       `Preferred slot: ${payload.day} at ${payload.time}\n` +
-      `— via JaipurEst website`;
+      `— via Acre Keys website`;
     // Never fire a request at the un-replaced placeholder: a browser error in
     // the console on every enquiry is worse than no POST at all.
     const ep = META.site && META.site.lead_endpoint;
@@ -497,6 +582,15 @@ function readHash() {
   (p.get("beds") || "").split(",").filter(Boolean).forEach((n) => state.beds.add(+n));
   (p.get("b") || "").split(",").filter(Boolean).forEach((b) => state.badges.add(b));
   hashLock = false;
+  // A ref code is not text that appears in any listing, so leaving it in `q`
+  // renders "No listings match these filters" -- exactly what shareListing()
+  // would have sent a buyer to. This is the arrival path for every shared
+  // link, so it must land on the property, not on an empty state.
+  if (state.q) {
+    const hit = findByRef(state.q);
+    if (hit) { state.q = ""; return hit; }
+  }
+  return null;
 }
 
 /* ---------------------------------------------------------------- selects */
@@ -675,11 +769,15 @@ async function boot() {
     .catch(() => {});
   fillLocalities();
   fillSources();
-  readHash();
+  // A shared link (#q=REF) must open the property, not filter for a ref code
+  // that exists in no listing text. readHash() returns that hit; run() is the
+  // only place ACTIVE gets populated, so openModal has to wait for it.
+  const shared = readHash();
   syncControls();
   paintMeta();
   bind();
   render();
+  if (shared) { openModal(shared); history.replaceState(null, "", location.pathname); }
 }
 
 // A seller-submitted record in the shape the rest of the UI already expects.
